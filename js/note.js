@@ -1,5 +1,4 @@
 /*jshint esversion: 6 */
-
 const Note = {
     IdCounter: 8,
     dragged: null,
@@ -24,6 +23,7 @@ const Note = {
             if(!noteElement.textContent.length){
                 noteElement.remove();
             }
+            Application.save();
         });
     
         noteElement.addEventListener('dragstart', Note.dragstart);
@@ -34,6 +34,24 @@ const Note = {
         noteElement.addEventListener('drop', Note.drop);
     },
     
+    create(id = null, content = ''){
+        const noteElement = document.createElement('div');
+        noteElement.classList.add('note');
+        noteElement.setAttribute('draggable', 'true');
+        noteElement.textContent = content;
+
+        if(id){
+            noteElement.setAttribute('data-note-id', id);
+        } else {
+            noteElement.setAttribute('data-note-id', Note.IdCounter);
+            Note.IdCounter++;
+        }
+        
+        Note.process(noteElement);
+        
+        return noteElement;
+    },
+
     //////////////////////////
     //                      //
     //   Function drag...   //
@@ -52,28 +70,30 @@ const Note = {
         document
             .querySelectorAll('.note')
             .forEach(x => x.classList.remove('under'));
+        
+        Application.save();
     },
     dragenter (event){
-        if(this == Note.dragged){
+        if(!Note.dragged || this == Note.dragged){
             return;
         }
         this.classList.add('under');
     },
     dragover (event){
-        if(this == Note.dragged){
+        if(!Note.dragged || this == Note.dragged){
             return;
         }
         event.preventDefault();
     },
     dragleave (event){
-        if(this == Note.dragged){
+        if(!Note.dragged || this == Note.dragged){
             return;
         }
         this.classList.remove('under');
     },
     drop (event){
         event.stopPropagation();
-        if(this == Note.dragged){
+        if(!Note.dragged || this == Note.dragged){
             return;
         }
         
